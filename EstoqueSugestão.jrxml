@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="EstoqueSugestão" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="codemp" class="java.math.BigDecimal">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+
+    CODPROD, DESCRPROD, MARCA,ESTOQUE, ESTMIN, ESTMAX, QTD, (QTD/4)*1.3 AS SUG_ESTMIN, (QTD/4)*1.5 AS SUG_ESTMAX
+
+    FROM
+
+
+    (SELECT
+
+    EST.CODPROD,
+    PRO.DESCRPROD,
+    PRO.MARCA,
+    nvl(pro.ESTMIN,0) as estmin,
+    nvl(pro.ESTMAX,0) as estmax,
+    nvl(SUM(EST.ESTOQUE)-SUM(EST.RESERVADO),0) AS ESTOQUE,
+    (select
+
+NVL(SUM(ITE.QTDNEG) ,0) AS QTD
+
+FROM
+
+TGFCAB CAB,
+TGFITE ITE,
+TGFPRO PR
+
+WHERE
+
+CAB.NUNOTA = ITE.NUNOTA
+AND ITE.CODPROD = PR.CODPROD
+AND CAB.TIPMOV IN ('V')
+AND CAB.STATUSNOTA = 'L'
+AND PR.CODPROD = EST.CODPROD
+AND CAB.CODTIPOPER IN( 700, 703, 706, 707, 709, 715, 723,724, 725)
+AND CAB.CODEMP = $P{codemp}
+
+AND TRUNC(CAB.DTFATUR) BETWEEN TO_DATE('01/04/2019','DD/MM/YYYY') AND TO_DATE('30/07/2019','DD/MM/YYYY')  ) AS QTD
+    FROM
+
+    TGFEST EST,
+    TGFPRO PRO
+
+    WHERE
+    PRO.CODPROD = EST.CODPROD AND
+    EST.CODEMP = $P{codemp}  AND
+    EST.ATIVO = 'S' AND
+    pro.ativo = 'S' AND
+    (PRO.CODGRUPOPROD >= 01 AND PRO.CODGRUPOPROD <= 5900000)
+
+    GROUP BY
+
+    EST.CODPROD, PRO.DESCRPROD, PRO.MARCA, pro.ESTMIN,pro.ESTMAX) order by marca desc]]>
+	</queryString>
+	<field name="CODPROD" class="java.math.BigDecimal"/>
+	<field name="DESCRPROD" class="java.lang.String"/>
+	<field name="MARCA" class="java.lang.String"/>
+	<field name="ESTOQUE" class="java.math.BigDecimal"/>
+	<field name="ESTMIN" class="java.math.BigDecimal"/>
+	<field name="ESTMAX" class="java.math.BigDecimal"/>
+	<field name="QTD" class="java.math.BigDecimal"/>
+	<field name="SUG_ESTMIN" class="java.math.BigDecimal"/>
+	<field name="SUG_ESTMAX" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<text><![CDATA[CODPROD]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="61" y="0" width="315" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<text><![CDATA[DESCRPROD]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="376" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<text><![CDATA[MARCA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="437" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<text><![CDATA[ESTOQUE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="498" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<text><![CDATA[ESTMIN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="559" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<text><![CDATA[ESTMAX]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="620" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<text><![CDATA[QTD]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="681" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<text><![CDATA[SUG_ESTMIN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="742" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<text><![CDATA[SUG_ESTMAX]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CODPROD}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="61" y="0" width="315" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{DESCRPROD}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="376" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{MARCA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="437" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{ESTOQUE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="498" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<textFieldExpression class="java.lang.Double"><![CDATA[$F{ESTMIN}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="559" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<textFieldExpression class="java.lang.Double"><![CDATA[$F{ESTMAX}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="620" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{QTD}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="681" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{SUG_ESTMIN}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="742" y="0" width="61" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Narrow"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{SUG_ESTMAX}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

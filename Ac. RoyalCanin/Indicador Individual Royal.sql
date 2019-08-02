@@ -1,0 +1,54 @@
+select 
+
+b.codvend, 
+b.apelido, 
+nvl(a.qtd,0) realizado,
+16 as meta,
+nvl(a.qtd,0)*100/16 as perc
+
+from
+
+(SELECT 
+CAB.CODVEND, VEN.APELIDO,
+count(distinct(SELECT codgrupai FROM TGFGRU WHERE CODGRUPOPROD = PR.CODGRUPOPROD group by codgrupai)) AS QTD
+
+
+
+FROM
+
+TGFCAB CAB,
+TGFITE ITE,
+TGFPRO PR,
+TGFVEN VEN
+
+WHERE
+
+CAB.NUNOTA = ITE.NUNOTA
+AND CAB.CODVEND = VEN.CODVEND
+AND ITE.CODPROD = PR.CODPROD
+AND PR.CODGRUPOPROD in( select codgrupoprod from tgfgru where codgrupai in( 1010100, 1010200,1010300,1010400,1010500,1010600,1010700,1010800,1010900,1011000,1011100,1011200,1020100, 1020200,1020300,1020400,1020500,1020600,1020700,1020800, 1013400) )
+AND CAB.TIPMOV IN ('V')
+AND CAB.STATUSNOTA = 'L'
+AND (PR.CODGRUPOPROD >= 01 
+AND PR.CODGRUPOPROD <= 5900000)
+AND CAB.CODTIPOPER IN( 700, 703, 706, 707, 709, 715, 723,724, 725)
+AND CAB.CODEMP = 1
+and ven.codvend not in (43,35,52,42, 54,58,62,59, 27, 40,2,32,44,20,11,10,17,14 )
+AND TRUNC(CAB.DTFATUR) BETWEEN TO_DATE('14/06/2019','DD/MM/YYYY') AND TO_DATE('11/07/2019','DD/MM/YYYY')
+GROUP BY  CAB.CODVEND, VEN.APELIDO
+ORDER BY CODVEND) a 
+
+full outer join
+
+(select 
+ven.codvend, 
+ven.apelido
+from 
+
+tgfven ven
+
+where 
+
+ven.codemp = 1
+and ven.ativo = 'S'
+and ven.codvend not in (43,35,52,42, 54,58,62,59, 27, 40,2,32,44,20,11,10,17,14 )) b on b.codvend = a.codvend order by realizado desc

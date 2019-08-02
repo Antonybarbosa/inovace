@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Indicador" pageWidth="612" pageHeight="792" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="2.143588810000004"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="147"/>
+	<import value="net.sf.jasperreports.engine.*"/>
+	<import value="java.util.*"/>
+	<import value="net.sf.jasperreports.engine.data.*"/>
+	<style name="style1">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean(($V{COLUMN_COUNT}.intValue() % 2) == 0)]]></conditionExpression>
+			<style mode="Opaque" backcolor="#CCCCCC"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="dtini" class="java.sql.Timestamp">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="dtfim" class="java.sql.Timestamp">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select
+
+b.codvend,
+b.apelido,
+nvl(a.qtd,0) realizado,
+16 as meta,
+nvl(a.qtd,0) - 16 as saldo,
+nvl(a.qtd,0)*100/16 as perc
+
+from
+
+(SELECT
+CAB.CODVEND, VEN.APELIDO,
+count(distinct(SELECT codgrupai FROM TGFGRU WHERE CODGRUPOPROD = PR.CODGRUPOPROD group by codgrupai)) AS QTD
+
+
+
+FROM
+
+TGFCAB CAB,
+TGFITE ITE,
+TGFPRO PR,
+TGFVEN VEN
+
+WHERE
+
+CAB.NUNOTA = ITE.NUNOTA
+AND CAB.CODVEND = VEN.CODVEND
+AND ITE.CODPROD = PR.CODPROD
+AND PR.CODGRUPOPROD in( select codgrupoprod from tgfgru where codgrupai in( 1010100, 1010200,1010300,1010400,1010500,1010600,1010700,1010800,1010900,1011000,1011100,1011200,1020100, 1020200,1020300,1020400,1020500,1020600,1020700,1020800, 1013400) )
+AND CAB.TIPMOV IN ('V')
+AND CAB.STATUSNOTA = 'L'
+AND (PR.CODGRUPOPROD >= 01
+AND PR.CODGRUPOPROD <= 5900000)
+AND CAB.CODTIPOPER IN( 700, 703, 706, 707, 709, 715, 723,724, 725)
+AND CAB.CODEMP = 1
+and ven.codvend not in (43,35,52,42, 54,58,62,59, 27, 40,2,32,44,20,11,10,17,14 )
+AND TRUNC(CAB.DTFATUR) BETWEEN TO_DATE('14/06/2019','DD/MM/YYYY') AND TO_DATE('11/07/2019','DD/MM/YYYY')
+GROUP BY  CAB.CODVEND, VEN.APELIDO
+ORDER BY CODVEND) a
+
+full outer join
+
+(select
+ven.codvend,
+ven.apelido
+from
+
+tgfven ven
+
+where
+
+ven.codemp = 1
+and ven.ativo = 'S'
+and ven.codvend not in (43,35,52,42, 54,58,62,59, 27, 40,2,32,44,20,11,10,17,14 )) b on b.codvend = a.codvend order by realizado desc]]>
+	</queryString>
+	<field name="CODVEND" class="java.math.BigDecimal"/>
+	<field name="APELIDO" class="java.lang.String"/>
+	<field name="REALIZADO" class="java.math.BigDecimal"/>
+	<field name="META" class="java.math.BigDecimal"/>
+	<field name="SALDO" class="java.math.BigDecimal"/>
+	<field name="PERC" class="java.math.BigDecimal"/>
+	<group name="Vendedor" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{APELIDO}]]></groupExpression>
+		<groupHeader>
+			<band height="24">
+				<textField>
+					<reportElement mode="Opaque" x="31" y="0" width="505" height="24" backcolor="#CCCCCC"/>
+					<textElement verticalAlignment="Middle">
+						<font size="14"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{APELIDO}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="31" y="23" width="506" height="1"/>
+				</line>
+				<subreport isUsingCache="false">
+					<reportElement key="Indicador_subreport2" mode="Transparent" x="333" y="0" width="203" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
+					<subreportParameter name="SUBREPORT_DIR">
+						<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="dtini">
+						<subreportParameterExpression><![CDATA[]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="codvend">
+						<subreportParameterExpression><![CDATA[$F{CODVEND}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="dtfim">
+						<subreportParameterExpression><![CDATA[]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "Indicador_subreport2.jasper"]]></subreportExpression>
+				</subreport>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="74" splitType="Stretch"/>
+	</title>
+	<detail>
+		<band height="138" splitType="Stretch">
+			<subreport isUsingCache="false">
+				<reportElement key="Indicador_subreport1" x="31" y="70" width="240" height="68"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="dtini">
+					<subreportParameterExpression><![CDATA[$P{dtini}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="codvend">
+					<subreportParameterExpression><![CDATA[$F{CODVEND}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="dtfim">
+					<subreportParameterExpression><![CDATA[$P{dtfim}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "Indicador_subreport1.jasper"]]></subreportExpression>
+			</subreport>
+			<textField>
+				<reportElement x="31" y="42" width="60" height="16"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{REALIZADO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="91" y="41" width="60" height="16"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{META}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="151" y="41" width="60" height="16"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{SALDO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="211" y="41" width="60" height="16"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{PERC}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="31" y="22" width="60" height="20" printWhenGroupChanges="Vendedor"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Realizado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="91" y="21" width="60" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Meta]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="151" y="21" width="60" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Saldo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="211" y="21" width="60" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Percentual]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="31" y="2" width="240" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Positivação Royal Canin]]></text>
+			</staticText>
+			<line>
+				<reportElement x="31" y="41" width="240" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="31" y="21" width="240" height="1"/>
+			</line>
+			<subreport isUsingCache="false">
+				<reportElement key="check" x="297" y="70" width="239" height="68"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="dtini">
+					<subreportParameterExpression><![CDATA[$P{dtini}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="codvend">
+					<subreportParameterExpression><![CDATA[$F{CODVEND}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="dtfim">
+					<subreportParameterExpression><![CDATA[$P{dtfim}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "Indicador_CheckIn.jasper"]]></subreportExpression>
+			</subreport>
+			<subreport isUsingCache="false" runToBottom="false">
+				<reportElement key="Indicador_Bayer" x="297" y="1" width="239" height="59"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="dtini">
+					<subreportParameterExpression><![CDATA[$P{dtini}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="codvend">
+					<subreportParameterExpression><![CDATA[$F{CODVEND}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="dtfim">
+					<subreportParameterExpression><![CDATA[$P{dtfim}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "Indicador_Bayer.jasper"]]></subreportExpression>
+			</subreport>
+			<line>
+				<reportElement x="31" y="57" width="240" height="1"/>
+			</line>
+			<line>
+				<reportElement x="31" y="60" width="240" height="1"/>
+			</line>
+		</band>
+	</detail>
+	<summary>
+		<band height="28" splitType="Stretch"/>
+	</summary>
+</jasperReport>
